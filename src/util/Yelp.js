@@ -7,25 +7,31 @@ const Yelp = {
         Authorization: `Bearer ${apiKey}`
       }
     }).then(response => {
-      return response.json(); 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
     }).then(jsonResponse => {
-      if (jsonResponse.businesses){
-        return jsonResponse.businesses.map(business => {
-          return {
-            id: business.id,
-            imageSrc: business.image_url,
-            name: business.name,
-            address: business.location.address1,
-            city: business.location.city, 
-            state: business.location.state,
-            zipCode: business.location.zip_code, 
-            category: business.categories[0].title,
-            rating: business.rating,
-            reviewCount: business.review_count,
-          }
-        }) 
-      } 
-    })
+      if (jsonResponse.businesses && jsonResponse.businesses.length > 0) {
+        return jsonResponse.businesses.map(business => ({
+          id: business.id,
+          imageSrc: business.image_url,
+          name: business.name,
+          address: business.location.address1,
+          city: business.location.city,
+          state: business.location.state,
+          zipCode: business.location.zip_code,
+          category: business.categories[0].title,
+          rating: business.rating,
+          reviewCount: business.review_count,
+        }));
+      } else {
+        throw new Error("No businesses found");
+      }
+    }).catch(error => {
+      console.error("Error fetching data from Yelp API:", error);
+      alert("Es wurden keine Ergebnisse gefunden. Bitte versuchen Sie es mit anderen Suchbegriffen.");
+    });
   }
 };
 
